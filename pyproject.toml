@@ -3,7 +3,7 @@ name = "research"
 version = "0.1.0"
 description = "Research workspace for developing and evaluating trading ideas"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "altair>=6.1.0",
     "backtrader>=1.9.78.123",
@@ -34,7 +34,9 @@ dependencies = [
     "torchtext>=0.18,<0.19",
     "duckdb>=1.5.4",
     "mlflow[genai]>=3.14.0",
+    "optuna>=4.0.0",
     "rich>=15.0.0",
+    "tickrake-client",
 ]
 
 [dependency-groups]
@@ -46,6 +48,7 @@ dev = [
 
 [tool.uv.sources]
 qstudy = { path = "../qstudy", editable = true }
+tickrake-client = { git = "ssh://git@github.com/jwplatta/tickrake-client.git", rev = "main" }
 
 [tool.ruff]
 line-length = 100
