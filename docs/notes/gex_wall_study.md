@@ -51,12 +51,12 @@ Study of whether GEX levels act as meaningful SPX inflection points, structured 
 | `scripts/gex_call_wall_hourly.py` | Phase 5: call wall + full feature set at each hour during RTH |
 | `scripts/fetch_vix_dec2025.py` | One-time: fetch Dec 2025 VIX 1-min from IBKR → `data/candles/` |
 
-### Data (data/candles/)
+### Data (data/candles/) — gitignored, regenerate with fetch scripts
 
-| File | Purpose |
-|------|---------|
-| `data/candles/vix_1min_dec2025.parquet` | Dec 2025 VIX 1-min bars fetched from IBKR (not in lakehouse) |
-| `data/candles/spy_1min_dec2025.parquet` | Dec 2025 SPY 1-min bars fetched from IBKR (not in lakehouse) |
+| File | Regenerate with | Purpose |
+|------|----------------|---------|
+| `data/candles/vix_1min_dec2025.parquet` | `scripts/fetch_vix_dec2025.py` | Dec 2025 VIX 1-min bars from IBKR (not in lakehouse) |
+| `data/candles/spy_1min_dec2025.parquet` | `scripts/fetch_spy_dec2025.py` | Dec 2025 SPY 1-min bars from IBKR (not in lakehouse) |
 
 ### Output (out/gex_walls/, out/gex_reversal/)
 
