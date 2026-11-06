@@ -29,7 +29,7 @@ htmlcov/
 *.csv
 *.xlsx
 *.parquet
-data/
+./data/
 
 # Notebooks — ignore everything except notebooks/shared/
 notebooks/**
@@ -64,3 +64,4 @@ mlflow.db
 mlruns/
 artifacts/
 /papers
+secrets.env
