@@ -33,10 +33,13 @@ dependencies = [
     "torch>=2.3,<2.4",
     "torchtext>=0.18,<0.19",
     "duckdb>=1.5.4",
+    "pyarrow>=17.0",
+    "pyiceberg[s3fs,sql-postgres,pyiceberg-core]>=0.7",
     "mlflow[genai]>=3.14.0",
     "optuna>=4.0.0",
     "rich>=15.0.0",
-    "tickrake-client",
+    "tractatus",
+    "ib-insync>=0.9.86",
 ]
 
 [dependency-groups]
@@ -48,7 +51,7 @@ dev = [
 
 [tool.uv.sources]
 qstudy = { path = "../qstudy", editable = true }
-tickrake-client = { git = "ssh://git@github.com/jwplatta/tickrake-client.git", rev = "main" }
+tractatus = { git = "ssh://git@github.com/jwplatta/tractatus.git", rev = "main" }
 
 [tool.ruff]
 line-length = 100
