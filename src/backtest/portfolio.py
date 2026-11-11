@@ -134,7 +134,9 @@ class Portfolio:
 
         entry_fees = pos["entry_fees"]
         total_fees = entry_fees + fees
-        net_pnl = structure_pnl - total_fees
+        # structure_pnl is the cash delta at close (e.g. assignment losses only for credit spreads).
+        # The premium was already added to cash at enter_position, so full net P&L includes it.
+        net_pnl = pos["premium"] + structure_pnl - total_fees
 
         # Update the matching open record in trade_history
         for record in reversed(self.trade_history):

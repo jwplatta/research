@@ -137,11 +137,14 @@ class IronCondorVerify(Strategy):
 
                 if sl:
                     reason = "SL"
-                    structure_pnl = (trade["credit"] - cost) * MULTIPLIER
+                    # portfolio already holds the premium in cash from enter_position;
+                    # structure_pnl is the close cost (negative = paying to buy back)
+                    structure_pnl = -cost * MULTIPLIER
+                    net_pnl = (trade["credit"] - cost) * MULTIPLIER
                     exit_fees = SCHWAB_FEE_PER_LEG * 4
                     self.log.info(
                         "%s %s EXIT(%s): cost_to_close=$%.2f  pnl=$%.2f",
-                        trade_date, t, reason, cost, structure_pnl - exit_fees,
+                        trade_date, t, reason, cost, net_pnl - exit_fees,
                     )
                     self.portfolio.exit_position(
                         trade["key"],
@@ -160,10 +163,11 @@ class IronCondorVerify(Strategy):
             sc, sp = trade["sc"], trade["sp"]
             call_loss = min(max(0.0, settle - sc), SPREAD_WIDTH)
             put_loss = min(max(0.0, sp - settle), SPREAD_WIDTH)
-            structure_pnl = (trade["credit"] - call_loss - put_loss) * MULTIPLIER
+            structure_pnl = -(call_loss + put_loss) * MULTIPLIER
+            net_pnl = (trade["credit"] - call_loss - put_loss) * MULTIPLIER
             self.log.info(
                 "%s %s EXIT(EOD): settle=%.2f  call_loss=%.2f  put_loss=%.2f  pnl=$%.2f",
-                trade_date, t, settle, call_loss, put_loss, structure_pnl,
+                trade_date, t, settle, call_loss, put_loss, net_pnl,
             )
             self.portfolio.exit_position(
                 trade["key"],

@@ -50,24 +50,51 @@ class TestPortfolio:
         assert p.free_buying_power == 8_195.0    # free_cash - 2000 max_risk
         assert p.current_equity == 10_395.0      # free_cash + 200 premium still open
 
-    def test_exit_settles_pnl(self):
+    def test_credit_spread_expires_worthless(self):
+        """Credit spread: premium already in cash; structure_pnl=0 (no assignment)."""
         p = Portfolio(10_000.0)
         p.enter_position("pos1", premium=200.0, fees=5.0, max_risk=2_000.0, timestamp=_ts(10))
-        p.exit_position("pos1", structure_pnl=200.0, fees=0.0, timestamp=_ts(16))
-        assert p.free_buying_power == pytest.approx(10_395.0)  # max_risk released
-        assert len(p.trade_history) == 1
+        p.exit_position("pos1", structure_pnl=0.0, fees=0.0, timestamp=_ts(16))
+        assert p.free_buying_power == pytest.approx(10_195.0)  # cash after entry, max_risk released
         trade = p.trade_history[0]
-        assert trade["exit_pnl"] == pytest.approx(195.0)       # 200 structure - 5 entry fees
+        assert trade["exit_pnl"] == pytest.approx(195.0)       # 200 premium - 5 entry fees
         assert trade["is_winner"] is True
 
-    def test_losing_trade(self):
+    def test_credit_spread_full_assignment(self):
+        """Credit spread fully assigned: structure_pnl = -(spread_width × multiplier)."""
         p = Portfolio(10_000.0)
         p.enter_position("pos1", premium=200.0, fees=5.0, max_risk=2_000.0, timestamp=_ts(10))
-        # SPX blew through the spread — full max loss
-        p.exit_position("pos1", structure_pnl=-1_800.0, fees=0.0, timestamp=_ts(16))
+        # Full 20-pt spread assigned: structure_pnl = -(20 * 100) = -2000
+        p.exit_position("pos1", structure_pnl=-2_000.0, fees=0.0, timestamp=_ts(16))
         trade = p.trade_history[0]
-        assert trade["exit_pnl"] == pytest.approx(-1_805.0)   # -1800 structure - 5 entry fees
+        assert trade["exit_pnl"] == pytest.approx(-1_805.0)    # 200 premium - 2000 loss - 5 fees
         assert trade["is_winner"] is False
+
+    def test_credit_spread_partial_loss(self):
+        """Credit spread partially assigned: structure_pnl = -(partial_loss × multiplier)."""
+        p = Portfolio(10_000.0)
+        p.enter_position("pos1", premium=200.0, fees=5.0, max_risk=2_000.0, timestamp=_ts(10))
+        # 5-pt assignment out of 20-pt spread: structure_pnl = -(5 * 100) = -500
+        p.exit_position("pos1", structure_pnl=-500.0, fees=0.0, timestamp=_ts(16))
+        trade = p.trade_history[0]
+        assert trade["exit_pnl"] == pytest.approx(-305.0)      # 200 premium - 500 loss - 5 fees
+        assert trade["is_winner"] is False
+
+    def test_debit_spread_exit_with_gain(self):
+        """Debit spread: negative premium at entry, positive structure_pnl at exit."""
+        p = Portfolio(10_000.0)
+        p.enter_position("pos1", premium=-300.0, fees=5.0, max_risk=2_000.0, timestamp=_ts(10))
+        p.exit_position("pos1", structure_pnl=800.0, fees=5.0, timestamp=_ts(16))
+        trade = p.trade_history[0]
+        assert trade["exit_pnl"] == pytest.approx(490.0)       # -300 + 800 - 5 - 5
+        assert trade["is_winner"] is True
+
+    def test_exit_releases_buying_power(self):
+        p = Portfolio(10_000.0)
+        p.enter_position("pos1", premium=200.0, fees=5.0, max_risk=2_000.0, timestamp=_ts(10))
+        assert p.free_buying_power == pytest.approx(8_195.0)
+        p.exit_position("pos1", structure_pnl=0.0, fees=0.0, timestamp=_ts(16))
+        assert p.free_buying_power == pytest.approx(10_195.0)  # max_risk released
 
     def test_double_enter_raises(self):
         p = Portfolio(10_000.0)
