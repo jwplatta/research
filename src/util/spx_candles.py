@@ -1,45 +1,56 @@
-"""Load SPX/VIX intraday candles from local tickrake ibkr-paper parquets."""
+"""Load SPX/VIX intraday candles from data/candles/ in the repo.
+
+Candle parquets live at: data/candles/{symbol}_{barsize}_{year}.parquet
+e.g. data/candles/spx_5min_2026.parquet
+
+Use scripts/fetch_spx_candles.py to fetch missing dates from IBKR.
+Do NOT read from or write to ~/.tickrake.
+"""
 
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
 
-CANDLES_1MIN_DIR = Path.home() / ".tickrake" / "data" / "candles" / "ibkr-paper" / "1min"
-CANDLES_5MIN_DIR = Path.home() / ".tickrake" / "data" / "candles" / "ibkr-paper" / "5min"
+CANDLES_DIR = Path(__file__).parent.parent.parent / "data" / "candles"
 TZ = "America/New_York"
 
 
-def _load_candles(base_dir: Path, symbol: str, start: date, end: date) -> pd.DataFrame:
-    """Load yearly parquets for a symbol from a candle directory."""
+def _load_candles(symbol: str, barsize: str, start: date, end: date) -> pd.DataFrame:
+    """Load yearly parquets for a symbol/barsize from data/candles/."""
     frames = []
     for year in range(start.year, end.year + 1):
-        path = base_dir / str(year) / f"{symbol}.parquet"
+        path = CANDLES_DIR / f"{symbol.lower()}_{barsize}_{year}.parquet"
         if not path.exists():
             continue
         df = pd.read_parquet(path)
-        df.index = pd.to_datetime(df["datetime"], utc=True).dt.tz_convert(TZ)
-        df = df.drop(columns=["datetime"])
-        frames.append(df)
+        df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
+        df = df.set_index("datetime").sort_index()
+        df.index = df.index.tz_convert(TZ)
+        mask = (df.index.date >= start) & (df.index.date < end)
+        frames.append(df[mask])
 
     if not frames:
         return pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
 
-    combined = pd.concat(frames).sort_index()
-    mask = (combined.index.date >= start) & (combined.index.date < end)
-    return combined[mask]
+    return pd.concat(frames).sort_index()
 
 
 def load_spx_1min(start: date, end: date) -> pd.DataFrame:
     """Load SPX 1-minute OHLCV bars for [start, end)."""
-    return _load_candles(CANDLES_1MIN_DIR, "SPX", start, end)
+    return _load_candles("spx", "1min", start, end)
 
 
 def load_vix9d_1min(start: date, end: date) -> pd.DataFrame:
     """Load VIX9D 1-minute OHLCV bars for [start, end)."""
-    return _load_candles(CANDLES_1MIN_DIR, "VIX9D", start, end)
+    return _load_candles("vix9d", "1min", start, end)
+
+
+def load_spx_5min(start: date, end: date) -> pd.DataFrame:
+    """Load SPX 5-minute OHLCV bars for [start, end)."""
+    return _load_candles("spx", "5min", start, end)
 
 
 def load_vix_5min(start: date, end: date) -> pd.DataFrame:
     """Load VIX 5-minute OHLCV bars for [start, end)."""
-    return _load_candles(CANDLES_5MIN_DIR, "VIX", start, end)
+    return _load_candles("vix", "5min", start, end)

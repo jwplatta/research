@@ -98,8 +98,9 @@ class BacktestResult:
         avg_winning_trade = float(np.mean(winners)) if winners else 0.0
         avg_losing_trade = float(np.mean(losers)) if losers else 0.0
 
-        if len(pnls) > 1 and np.std(pnls) > 0:
-            sharpe = float(np.mean(pnls) / np.std(pnls) * math.sqrt(252))
+        daily_returns = np.diff(equity_arr)
+        if len(daily_returns) > 1 and np.std(daily_returns) > 0:
+            sharpe = float(np.mean(daily_returns) / np.std(daily_returns) * math.sqrt(252))
         else:
             sharpe = 0.0
 

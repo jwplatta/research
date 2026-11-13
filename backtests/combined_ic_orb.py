@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from backtest import BacktestEngine, Strategy
 from iron_condor_verify import IronCondorVerify
-from orb_backtest import ORBBacktest
+from backtests.orb_backtest import ORBBacktest
 
 sys.path.insert(0, str(Path(__file__).parent))
 

@@ -1,8 +1,8 @@
-"""Smoke test to verify tickrake-client is installed and can read local data."""
+"""Smoke test to verify tractatus tickrake client is installed and can read local data."""
 
 from datetime import date
 
-from tickrake_client import TickrakeClient
+from tractatus.tickrake import TickrakeClient
 
 
 def main() -> None:
