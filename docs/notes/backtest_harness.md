@@ -151,6 +151,5 @@ All written to `out_dir/`:
 
 ## Known Issues / Watch Points
 
-- **`volatility` column in Schwab options data is inconsistent with `delta`** — the IV values (~9-12% for ATM) don't match the Black-Scholes delta values. Don't use `volatility` for calculations; use `delta` for strike selection (Schwab's own calculation).
 - **100% win rate in Dec 2025–Feb 2026**: the ~7-delta iron condor has very wide strikes (call ~200 pts OTM, put ~325+ pts OTM on SPX ~6900–7000). SPX didn't breach either side in this period. This is a property of the market, not a bug.
 - **`sys.path.insert(0, 'src')`**: backtests add `src/` to path at runtime since `src` is not a package (consistent with `scripts/` pattern in this repo).

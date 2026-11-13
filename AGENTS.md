@@ -165,7 +165,6 @@ s3://tractatus-lakehouse/options/schwab/YYYY/MM/DD/{root}_samples_YYYY-MM-DD.par
 
 **Timestamps in these files are UTC.** Convert to Central Time (America/Chicago) after
 loading before any time-of-day logic or display.
-
 **Never read from the local tickrake collector directory
 (`~/.tickrake/data/options/`) unless the user explicitly asks you to.** The
 lakehouse is the authoritative source for option chain data.
